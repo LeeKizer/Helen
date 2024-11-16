@@ -18,6 +18,13 @@ How to Use:
 
 chmod +x update_raspberry_pi.sh
 
+create dir called helen
+mkdir helen
+
+clone git repo
+git clone {my repo adress}
+
+
 
 3. Run the script:
 
