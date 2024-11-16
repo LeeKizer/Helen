@@ -23,7 +23,7 @@ sudo apt autoclean -y
 
 # Install Git
 echo "Installing Git..."
-sudo apt-get update and sudo apt-get install git
+sudo apt-get install git -y
 
 # Install pyenv
 curl https://pyenv.run | bash
