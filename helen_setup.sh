@@ -44,3 +44,9 @@ sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plug
 
 # Verify Docker installation
 sudo docker run hello-world
+
+# Pull Containers
+sudo docker pull lscr.io/linuxserver/obsidian:latest
+sudo docker pull pihole/pihole:latest
+sudo docker pull leplusorg/kali
+sudo docker pull ollama/ollama
