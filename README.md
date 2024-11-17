@@ -21,30 +21,4 @@ Step 2 - Update and install git
   - run: ./helen_setup.sh
 
 
-run update file
-
-How to Use:
-
-1. Save the script to a file (e.g., update_raspberry_pi.sh).
-
-
-2. Make it executable:
-
-chmod +x update_raspberry_pi.sh
-
-create dir called helen
-mkdir helen
-
-clone git repo
-git clone {my repo adress}
-
-
-
-3. Run the script:
-
-./update_raspberry_pi.sh
-
-
-
-This script ensures your Raspberry Pi stays updated while providing an option for firmware updates and rebooting.
 
