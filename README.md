@@ -19,12 +19,11 @@ Step 2 - Update and install git
   - run: cd Helen
   - run: chmod +x helen_setup.sh
   - run: ./helen_setup.sh
-
-'''python
+```python
 import os
 if foo then fuo:
   test = 1
-'''
+```
 
 
 
