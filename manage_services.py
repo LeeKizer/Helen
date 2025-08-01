@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from typing import List, Tuple
 
 SECTIONS = [
     ("Infrastructure services", "docker-compose.Helen-Infrastructure.yml"),
@@ -55,6 +56,49 @@ def run_compose_file(
     subprocess.run(cmd, check=True)
 
 
+def parse_compose(path: Path) -> Tuple[List[str], List[str]]:
+    """Extract port mappings and volume mounts from a compose YAML file.
+
+    This parser is intentionally simple and only handles the subset of YAML
+    used by the project compose files. It scans for ``ports`` and ``volumes``
+    sections and captures any ``- host:container`` style entries beneath them.
+    """
+
+    ports: List[str] = []
+    volumes: List[str] = []
+    current: str | None = None
+    indent_level = 0
+
+    with open(path) as fh:
+        for raw in fh:
+            if not raw.strip() or raw.strip().startswith("#"):
+                continue
+
+            indent = len(raw) - len(raw.lstrip())
+            line = raw.strip()
+
+            if line.startswith("ports:"):
+                current = "ports"
+                indent_level = indent
+                continue
+            if line.startswith("volumes:"):
+                current = "volumes"
+                indent_level = indent
+                continue
+
+            if current and indent <= indent_level:
+                current = None
+
+            if current and line.startswith("-"):
+                entry = line[1:].strip().split("#")[0].strip().strip('"')
+                if current == "ports":
+                    ports.append(entry)
+                else:
+                    volumes.append(entry)
+
+    return ports, volumes
+
+
 # ----- install -----
 
 def cmd_install(_: argparse.Namespace) -> None:
@@ -93,6 +137,23 @@ def cmd_run(args: argparse.Namespace) -> None:
     if pw1 != pw2:
         print("Passwords do not match.")
         sys.exit(1)
+
+    compose_path = Path(args.compose_file)
+    ports, volumes = parse_compose(compose_path)
+
+    info_path = Path(__file__).resolve().parent / "deployment_info.txt"
+    with info_path.open("a") as info:
+        info.write(f"Compose: {compose_path}\n")
+        info.write(f"Password: {pw1}\n")
+        if ports:
+            info.write("Ports:\n")
+            for p in ports:
+                info.write(f"  - {p}\n")
+        if volumes:
+            info.write("Volumes:\n")
+            for v in volumes:
+                info.write(f"  - {v}\n")
+        info.write("\n")
 
     with tempfile.NamedTemporaryFile("w", delete=False) as tmp:
         tmp.write(f"{args.var}={pw1}\n")
