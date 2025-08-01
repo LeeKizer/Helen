@@ -4,13 +4,16 @@ A home server and Calendar app
 🔧 How to Use It
 Save the file as docker-compose.yml
 
-Run the stack:
+Run the stack using the helper script:
 
---bash
-Copy
-Edit
-podman-compose -p Helen-Infrastructure up -d
---bash
+```bash
+python run_compose.py docker-compose.Helen-Infrastructure.yml -p Helen-Infrastructure
+```
+
+The script will prompt for a password and run `podman compose` with a temporary
+environment file. The file is removed automatically after the command
+completes.
+
 Access Nginx Proxy Manager at:
 
 http://<your-ip>:81
