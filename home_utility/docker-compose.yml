@@ -1,0 +1,81 @@
+version: "3.8"
+
+services:
+  openhab:
+    image: openhab/openhab:latest
+    container_name: openhab
+    ports:
+      - "8080:8080"
+    volumes:
+      - openhab_addons:/openhab/addons
+      - openhab_conf:/openhab/conf
+      - openhab_userdata:/openhab/userdata
+    restart: unless-stopped
+
+  grocy:
+    image: linuxserver/grocy
+    container_name: grocy-home
+    ports:
+      - "9284:80"
+    volumes:
+      - grocy_home_data:/config
+    restart: unless-stopped
+
+  immich:
+    image: ghcr.io/immich-app/immich-server:release
+    container_name: immich
+    ports:
+      - "3003:3003"
+    volumes:
+      - immich_library:/usr/src/app/upload
+    restart: unless-stopped
+
+  photoprism:
+    image: photoprism/photoprism
+    container_name: photoprism
+    ports:
+      - "2342:2342"
+    volumes:
+      - photoprism_storage:/photoprism/storage
+      - /path/to/photos:/photoprism/originals
+    restart: unless-stopped
+
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+    ports:
+      - "8082:80"
+    volumes:
+      - nextcloud_data:/var/www/html
+    restart: unless-stopped
+
+  syncthing:
+    image: syncthing/syncthing
+    container_name: syncthing
+    ports:
+      - "8384:8384"
+      - "22000:22000/tcp"
+      - "21027:21027/udp"
+    volumes:
+      - syncthing_config:/var/syncthing
+    restart: unless-stopped
+
+  dashy:
+    image: lissy93/dashy
+    container_name: dashy
+    ports:
+      - "4000:80"
+    volumes:
+      - dashy_data:/app/user-data
+    restart: unless-stopped
+
+volumes:
+  openhab_addons:
+  openhab_conf:
+  openhab_userdata:
+  grocy_home_data:
+  immich_library:
+  photoprism_storage:
+  nextcloud_data:
+  syncthing_config:
+  dashy_data:

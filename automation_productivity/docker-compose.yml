@@ -1,0 +1,89 @@
+version: "3.8"
+
+services:
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    restart: unless-stopped
+
+  homebox:
+    image: hay-kot/homebox
+    container_name: homebox
+    ports:
+      - "7745:7745"
+    volumes:
+      - homebox_data:/data
+    restart: unless-stopped
+
+  home-assistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: home-assistant
+    ports:
+      - "8123:8123"
+    volumes:
+      - home_assistant_config:/config
+    restart: unless-stopped
+
+  node-red:
+    image: nodered/node-red
+    container_name: node-red
+    ports:
+      - "1880:1880"
+    volumes:
+      - nodered_data:/data
+    restart: unless-stopped
+
+  tandoor:
+    image: vabene1111/recipes
+    container_name: tandoor
+    ports:
+      - "8081:8080"
+    volumes:
+      - tandoor_static:/opt/recipes/staticfiles
+      - tandoor_media:/opt/recipes/mediafiles
+    restart: unless-stopped
+
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v1.0.0
+    container_name: mealie
+    ports:
+      - "9925:9000"
+    volumes:
+      - mealie_data:/app/data
+    restart: unless-stopped
+
+  logseq:
+    image: ghcr.io/realtaboo/logseq:latest
+    container_name: logseq
+    ports:
+      - "3002:3000"
+    volumes:
+      - logseq_data:/logseq
+    restart: unless-stopped
+
+  paperless-ngx:
+    image: ghcr.io/paperless-ngx/paperless-ngx
+    container_name: paperless-ngx
+    ports:
+      - "8005:8000"
+    volumes:
+      - paperless_data:/usr/src/paperless/data
+      - paperless_media:/usr/src/paperless/media
+      - ./paperless/export:/usr/src/paperless/export
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
+  homebox_data:
+  home_assistant_config:
+  nodered_data:
+  tandoor_static:
+  tandoor_media:
+  mealie_data:
+  logseq_data:
+  paperless_data:
+  paperless_media:

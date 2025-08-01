@@ -1,21 +1,11 @@
 # Helen
-A home server and Calendar app
+A home server and Calendar app.
 
-🔧 How to Use It
-Save the file as docker-compose.yml
+## Usage
+Docker compose files are organized by service category in their own directories. Run `./setup_services.py` to start all stacks.
 
-Run the stack:
+Access Nginx Proxy Manager at `http://<your-ip>:81` with the default login `admin@example.com` / `changeme` (you will be prompted to reset the password).
 
---bash
-Copy
-Edit
-podman-compose -p Helen-Infrastructure up -d
---bash
-Access Nginx Proxy Manager at:
-
-http://<your-ip>:81
-
-Default login: admin@example.com / changeme (prompted to reset on first login)
 
 🏗️ Infrastructure
 These are the foundational containers that support and enable other services.
