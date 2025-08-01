@@ -69,7 +69,7 @@ services:
   postgres:
     image: postgres:14
     environment:
-      - POSTGRES_PASSWORD=plausiblepass
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-plausiblepass}
       - POSTGRES_USER=plausible
       - POSTGRES_DB=plausible_db
     volumes:
