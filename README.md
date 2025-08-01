@@ -1,160 +1,95 @@
-# Helen
-A home server and Calendar app.
-
-## Usage
-Docker compose files are organized by service category in their own directories. Run `./manage_services.py setup` to start all stacks.
-
-codex/create-yaml-files-and-python-script-for-containers
-Access Nginx Proxy Manager at `http://<your-ip>:81` with the default login `admin@example.com` / `changeme` (you will be prompted to reset the password).
-
-
-Run the stack using the helper script:
-
-```bash
-python manage_services.py run docker-compose.Helen-Infrastructure.yml -p Helen-Infrastructure
-```
-
-The script will prompt for a password and run `podman compose` with a temporary
-environment file. The file is removed automatically after the command
-completes.
-
-Access Nginx Proxy Manager at:
-
-http://<your-ip>:81
-
-Default login: admin@example.com / changeme (prompted to reset on first login)
-Working
-
-🏗️ Infrastructure
-These are the foundational containers that support and enable other services.
-
-Traefik or Caddy – reverse proxy with automatic HTTPS
-
-Portainer – web UI for managing containers
-
-Watchtower – auto-updates containers
-
-Nginx Proxy Manager – alternative GUI-based reverse proxy
-
-Netdata – system monitoring
-
-Uptime Kuma – uptime monitoring
-
-Prometheus + Grafana – metrics and dashboards
-
-Plausible – self-hosted analytics
-
-CrowdSec – security and intrusion detection
-
-Vaultwarden – self-hosted password manager
-
-🧠 AI / LLM
-AI model hosting, interfaces, and tools for automation and experimentation.
-
-Ollama – local LLM model runtime
-
-Open WebUI – frontend for interacting with Ollama
-
-Text Generation WebUI – advanced model management
-
-LM Studio – local model interface (if containerized)
-
-FastAPI or Flask API – your own custom LLM tool endpoints
-
-Langchain Server – orchestration layer for LLM agents
-
-Vector DBs (e.g. Qdrant, Weaviate) – for RAG-based retrieval
-
-Jupyter Notebook / VS Code Server – for model testing/development
-
-🔁 Automation / Productivity
-Workflow tools, scripting, integrations, and task automation.
-
-n8n – workflow automation (Zapier alternative)
-
-Homebox – digital inventory management
-
-Home Assistant – home automation
-
-Node-RED – low-code automation tool
-
-Tandoor Recipes – recipe and meal planning manager
-
-Mealie – meal planning and shopping list app
-
-Logseq or Outline – personal knowledge base (self-hosted Notion/Obsidian)
-
-Paperless-ngx – document management (scanned docs, PDFs)
-
-🛜 Networking / Access / Security
-Tools for remote access, secure tunnels, and network visibility.
-
-WireGuard or OpenVPN – VPN access
-
-Tailscale – easy remote access to your network
-
-Pi-hole – network-wide ad blocker
-
-AdGuard Home – DNS-level blocker with UI
-
-DoH Server (e.g., dnscrypt-proxy) – encrypted DNS
-
-Glances – system and container monitoring
-
-🎬 Media
-Media servers and their supporting tools for organization and streaming.
-
-Plex or Jellyfin – media server
-
-Radarr – movies downloader (via Usenet/torrent)
-
-Sonarr – TV series downloader
-
-Bazarr – subtitles automation
-
-Prowlarr – indexer manager
-
-qBittorrent or Transmission – torrent client
-
-Tdarr – media transcoding automation
-
-🧑‍🍳 Food & Health
-Nutrition, tracking, and planning tools.
-
-Tandoor Recipes – recipe and nutrition tracker
-
-Mealie – meal planning and shopping
-
-Own calorie tracker API (or link to external like LoseIt! via API)
-
-Grocy – grocery inventory and budgeting
-
-🧪 Development / Coding
-Tools for code hosting, dev environments, and collaborative tools.
-
-Code-Server – VS Code in the browser
-
-GitLab / Gitea – Git hosting
-
-PostgreSQL / MariaDB / Redis – common database backends
-
-Minio – S3-compatible object storage
-
-SFTPgo – file transfer and storage
-
-🏡 Home / Utility
-Tools that serve home-focused or general life management purposes.
-
-OpenHAB – alternative home automation platform
-
-Grocy – home management (inventory, chores, budgeting)
-
-Immich – self-hosted Google Photos alternative
-
-Photoprism – AI photo organization
-
-Nextcloud – personal cloud storage and apps
-
-Syncthing – file sync across devices
-
-Dashy / Heimdall – dashboard for service access
+Helen
+=====
+
+This repository collects docker-compose stacks for a personal home server.
+
+Prerequisites
+-------------
+- Docker or Podman with the compose plugin
+- Python 3.8+ to run `manage_services.py`
+
+Usage
+-----
+1. Clone this repository.
+2. Ensure the prerequisites above are installed.
+3. Deploy all service stacks with:
+   `python manage_services.py setup`
+4. To run an individual compose file:
+   `python manage_services.py run <compose-file> -p <project>`
+
+Containers
+----------
+Infrastructure
+* [Nginx Proxy Manager](https://nginxproxymanager.com/)
+* [Portainer](https://www.portainer.io/)
+* [Watchtower](https://containrrr.dev/watchtower/)
+* [Netdata](https://www.netdata.cloud/)
+* [Uptime Kuma](https://github.com/louislam/uptime-kuma)
+* [Plausible](https://plausible.io/)
+* [Prometheus](https://prometheus.io/)
+* [Grafana](https://grafana.com/)
+* [CrowdSec](https://www.crowdsec.net/)
+* [Vaultwarden](https://github.com/dani-garcia/vaultwarden)
+
+AI / LLM
+* [Ollama](https://ollama.ai/)
+* [Open WebUI](https://github.com/open-webui/open-webui)
+* [Text Generation WebUI](https://github.com/oobabooga/text-generation-webui)
+* [LM Studio](https://lmstudio.ai/)
+* [FastAPI](https://fastapi.tiangolo.com/)
+* [Langchain Server](https://github.com/hwchase17/langchain)
+* [Qdrant](https://qdrant.tech/)
+* [Weaviate](https://weaviate.io/)
+* [Jupyter Notebook](https://jupyter.org/)
+* [VS Code Server](https://github.com/coder/code-server)
+
+Automation / Productivity
+* [n8n](https://n8n.io/)
+* [Homebox](https://github.com/hay-kot/homebox)
+* [Home Assistant](https://www.home-assistant.io/)
+* [Node-RED](https://nodered.org/)
+* [Tandoor Recipes](https://tandoor.dev/)
+* [Mealie](https://github.com/mealie-recipes/mealie)
+* [Logseq](https://logseq.com/)
+* [Outline](https://www.getoutline.com/)
+* [Paperless-ngx](https://paperless-ngx.com/)
+
+Networking / Access / Security
+* [WireGuard](https://www.wireguard.com/)
+* [OpenVPN](https://openvpn.net/)
+* [Tailscale](https://tailscale.com/)
+* [Pi-hole](https://pi-hole.net/)
+* [AdGuard Home](https://adguard.com/adguard-home/overview.html)
+* [dnscrypt-proxy](https://github.com/DNSCrypt/dnscrypt-proxy)
+* [Glances](https://nicolargo.github.io/glances/)
+
+Media
+* [Plex](https://www.plex.tv/) / [Jellyfin](https://jellyfin.org/)
+* [Radarr](https://radarr.video/)
+* [Sonarr](https://sonarr.tv/)
+* [Bazarr](https://www.bazarr.media/)
+* [Prowlarr](https://wiki.servarr.com/prowlarr)
+* [qBittorrent](https://www.qbittorrent.org/) / [Transmission](https://transmissionbt.com/)
+* [Tdarr](https://github.com/HaveAGitGat/Tdarr)
+
+Food & Health
+* [Tandoor Recipes](https://tandoor.dev/)
+* [Mealie](https://github.com/mealie-recipes/mealie)
+* [Calorie API](https://fastapi.tiangolo.com/)
+* [Grocy](https://grocy.info/)
+
+Development / Coding
+* [Code-Server](https://github.com/coder/code-server)
+* [Gitea](https://gitea.io/) / [GitLab](https://about.gitlab.com/)
+* [PostgreSQL](https://www.postgresql.org/) / [MariaDB](https://mariadb.org/) / [Redis](https://redis.io/)
+* [Minio](https://min.io/)
+* [SFTPgo](https://github.com/drakkan/sftpgo)
+
+Home / Utility
+* [OpenHAB](https://www.openhab.org/)
+* [Grocy](https://grocy.info/)
+* [Immich](https://github.com/immich-app/immich)
+* [Photoprism](https://photoprism.app/)
+* [Nextcloud](https://nextcloud.com/)
+* [Syncthing](https://syncthing.net/)
+* [Dashy](https://github.com/Lissy93/dashy) / [Heimdall](https://heimdall.site/)
