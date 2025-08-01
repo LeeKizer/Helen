@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server
+    container_name: code-server-dev
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+    volumes:
+      - code_server_data:/config
+      - ./projects:/projects
+    ports:
+      - "8443:8443"
+    restart: unless-stopped
+
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+    volumes:
+      - gitea_data:/data
+    ports:
+      - "3002:3000"
+      - "222:22"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+
+  sftpgo:
+    image: drakkan/sftpgo
+    container_name: sftpgo
+    volumes:
+      - sftpgo_data:/var/lib/sftpgo
+    ports:
+      - "2022:2022"
+    restart: unless-stopped
+
+volumes:
+  code_server_data:
+  gitea_data:
+  postgres_data:
+  redis_data:
+  minio_data:
+  sftpgo_data:

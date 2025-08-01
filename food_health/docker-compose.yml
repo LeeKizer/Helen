@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  tandoor:
+    image: vabene1111/recipes
+    container_name: tandoor
+    ports:
+      - "8080:8080"
+    volumes:
+      - tandoor_static:/opt/recipes/staticfiles
+      - tandoor_media:/opt/recipes/mediafiles
+    restart: unless-stopped
+
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:v1.0.0
+    container_name: mealie
+    ports:
+      - "9090:9000"
+    volumes:
+      - mealie_data:/app/data
+    restart: unless-stopped
+
+  calorie-api:
+    image: tiangolo/uvicorn-gunicorn-fastapi:python3.11
+    container_name: calorie-api
+    volumes:
+      - ./calorie_api:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8003:8000"
+    restart: unless-stopped
+
+  grocy:
+    image: linuxserver/grocy
+    container_name: grocy
+    ports:
+      - "9283:80"
+    volumes:
+      - grocy_data:/config
+    restart: unless-stopped
+
+volumes:
+  tandoor_static:
+  tandoor_media:
+  mealie_data:
+  grocy_data:
