@@ -4,8 +4,26 @@ A home server and Calendar app.
 ## Usage
 Docker compose files are organized by service category in their own directories. Run `./setup_services.py` to start all stacks.
 
+codex/create-yaml-files-and-python-script-for-containers
 Access Nginx Proxy Manager at `http://<your-ip>:81` with the default login `admin@example.com` / `changeme` (you will be prompted to reset the password).
 
+
+Run the stack using the helper script:
+
+```bash
+python run_compose.py docker-compose.Helen-Infrastructure.yml -p Helen-Infrastructure
+```
+
+The script will prompt for a password and run `podman compose` with a temporary
+environment file. The file is removed automatically after the command
+completes.
+
+Access Nginx Proxy Manager at:
+
+http://<your-ip>:81
+
+Default login: admin@example.com / changeme (prompted to reset on first login)
+Working
 
 🏗️ Infrastructure
 These are the foundational containers that support and enable other services.
