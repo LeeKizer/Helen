@@ -40,7 +40,7 @@ def confirm(prompt: str) -> bool:
 def run_compose_file(
     compose_file: Path,
     *,
-    engine: str = "docker",
+    engine: str = "podman",
     command: str = "up -d",
     env: Path | None = None,
     project: str | None = None,
