@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 CATEGORIES = [
-#    "infrastructure",
+    "infrastructure",
     "ai_llm",
 #    "automation_productivity",
 #    "networking",
