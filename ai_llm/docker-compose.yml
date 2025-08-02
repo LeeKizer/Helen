@@ -3,10 +3,10 @@ version: "3.8"
 volumes:
   ollama_data:
   openwebui_data:
-  
+
 services:
   ollama:
-    image: ollama/ollama
+    image: docker.io/ollama/ollama:latest
     container_name: ollama
     ports:
       - "11434:11434"
@@ -35,7 +35,3 @@ services:
     depends_on:
       - ollama
     restart: unless-stopped
-
-
-
-
