@@ -1,8 +1,14 @@
 version: "3.8"
 
+volumes:
+  npm_data:
+  npm_letsencrypt:
+  uptimekuma_data:
+  postgres_data:
+  
 services:
   nginx-proxy-manager:
-    image: jc21/nginx-proxy-manager:latest
+    image: docker.io/jc21/nginx-proxy-manager:latest
     ports:
       - "80:80"
       - "81:81"     # NPM admin UI
@@ -12,91 +18,19 @@ services:
       - npm_letsencrypt:/etc/letsencrypt
     restart: unless-stopped
 
-  portainer:
-    image: portainer/portainer-ce
-    ports:
-      - "9000:9000"
-    volumes:
-      - portainer_data:/data
-      - /var/run/podman/podman.sock:/var/run/docker.sock
-    restart: unless-stopped
-
   uptime-kuma:
-    image: louislam/uptime-kuma
+    image: docker.io/louislam/uptime-kuma
     ports:
       - "3001:3001"
     volumes:
       - uptimekuma_data:/app/data
     restart: unless-stopped
 
-  netdata:
-    image: netdata/netdata
-    ports:
-      - "19999:19999"
-    cap_add:
-      - SYS_PTRACE
-    security_opt:
-      - apparmor:unconfined
-    volumes:
-      - netdata_config:/etc/netdata
-      - netdata_lib:/var/lib/netdata
-      - netdata_cache:/var/cache/netdata
-      - /etc/passwd:/host/etc/passwd:ro
-      - /etc/group:/host/etc/group:ro
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /etc/os-release:/host/etc/os-release:ro
-    environment:
-      - NETDATA_CLAIM_TOKEN=
-      - NETDATA_CLAIM_URL=
-    restart: unless-stopped
-
-  plausible:
-    image: plausible/analytics
-    depends_on:
-      - postgres
-      - clickhouse
-    environment:
-      - BASE_URL=http://localhost:8000
-      - SECRET_KEY=changeme
-      - DISABLE_REGISTRATION=true
-    ports:
-      - "8000:8000"
-    volumes:
-      - plausible_db:/plausible/db
-    restart: unless-stopped
-
   postgres:
-    image: postgres:14
+    image: docker.io/postgres:14
     environment:
       - POSTGRES_PASSWORD=plausiblepass
       - POSTGRES_USER=plausible
-      - POSTGRES_DB=plausible_db
     volumes:
-      - plausible_postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
-
-  clickhouse:
-    image: clickhouse/clickhouse-server:22.6
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-    restart: unless-stopped
-
-  watchtower:
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/podman/podman.sock:/var/run/docker.sock
-    command: --cleanup --interval 300
-    restart: unless-stopped
-
-volumes:
-  npm_data:
-  npm_letsencrypt:
-  portainer_data:
-  uptimekuma_data:
-  netdata_config:
-  netdata_lib:
-  netdata_cache:
-  plausible_db:
-  plausible_postgres:
-  clickhouse_data:
