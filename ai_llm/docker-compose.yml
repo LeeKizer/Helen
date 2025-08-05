@@ -6,7 +6,7 @@ volumes:
 
 services:
   ollama:
-    image: docker.io/ollama/ollama:latest
+    image: ollama/ollama:latest
     container_name: ollama
     ports:
       - "11434:11434"
