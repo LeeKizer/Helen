@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import subprocess
-import requests
 from datetime import datetime
+import time
+from urllib import request, error
 
 # List of containers and URLs to check
 SERVICES = [
@@ -25,17 +26,18 @@ def get_running_containers():
     """Return a set of currently running container names."""
     try:
         output = subprocess.check_output(DOCKER_CMD, text=True)
-        return set(output.strip().split("\n"))
-    except subprocess.CalledProcessError as e:
+        return set(filter(None, output.splitlines()))
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
         print("Error checking Docker containers:", e)
         return set()
 
 def check_web(url):
     """Check if a web page is reachable."""
     try:
-        r = requests.get(url, timeout=5)
-        return r.status_code, r.elapsed.total_seconds()
-    except requests.RequestException:
+        start = time.monotonic()
+        with request.urlopen(url, timeout=5) as r:
+            return r.getcode(), time.monotonic() - start
+    except error.URLError:
         return None, None
 
 def main():
