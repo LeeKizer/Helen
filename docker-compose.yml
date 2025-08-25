@@ -4,324 +4,148 @@ version: "3.9"
 # NETWORKS
 # =========
 networks:
-  proxy:
-    external: false
   services:
-    internal: true
   databases:
     internal: true
+
+# =========
+# VOLUMES
+# =========
+volumes:
+  postgres_data:
+    name: postgres_data
+    driver: local
+  mealie_data:
+    name: mealie_data
+    driver: local
+  grocy_data:
+    name: grocy_data
+    driver: local
+  actualbudget_data:
+    name: actualbudget_data
+    driver: local
+  homebox_data:
+    name: homebox_data
+    driver: local
+  manyfold_data:
+    name: manyfold_data
+    driver: local
+  manyfold_config:
+    name: manyfold_config
+    driver: local
+  redis_data:
+    name: redis_data
+    driver: local
+
+# =========
+# SECRETS
+# =========
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
 
 # =========
 # SERVICES
 # =========
 services:
-  # --- Reverse proxy / LAN routing ---
-  traefik:
-    image: traefik:v3.1
-    command:
-      - "--api.dashboard=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--certificatesresolvers.le.acme.tlschallenge=true"
-      - "--certificatesresolvers.le.acme.email=admin@example.com"  # replace with your email
-      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /srv/containers/traefik/letsencrypt:/letsencrypt
-    networks: [proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.local`)"
-      - "traefik.http.routers.traefik.entrypoints=websecure"
-      - "traefik.http.routers.traefik.tls.certresolver=le"
-      - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.middlewares=traefik-auth"
-      - "traefik.http.middlewares.traefik-auth.basicauth.users=user:$$apr1$$H6uskkkW$$IgXLP6ewTrSuBkTrqE8wj/"  # user:password
-
   # --- Datastores (shared) ---
   postgres:
     image: postgres:16
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-stack}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stackpass}
-      TZ: America/Detroit
+      POSTGRES_USER: Docker
+      POSTGRES_PASSWORD: run/secrets/postgres_password
     volumes:
-      - /srv/containers/dbs/postgres:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks: [databases]
 
   redis:
-    image: redis:7
-    command: ["redis-server","--appendonly","yes"]
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
     volumes:
-      - /srv/containers/dbs/redis:/data
+      - redis_data:/data
     networks: [databases]
-
-  # Helper to create application databases (runs once and exits)
-  db-init:
-    image: postgres:16
-    depends_on:
-      - postgres
-    networks: [databases]
-    environment:
-      PGPASSWORD: ${POSTGRES_PASSWORD:-stackpass}
-      TZ: America/Detroit
-    entrypoint: ["/bin/bash","-lc"]
-    command: >
-      for db in manyfold immich nextcloud paperless; do
-        psql -h postgres -U ${POSTGRES_USER:-stack} -tc "SELECT 1 FROM pg_database WHERE datname='${db}'" | grep -q 1 \
-        || psql -h postgres -U ${POSTGRES_USER:-stack} -c "CREATE DATABASE ${db};";
-      done
-    restart: "no"
 
   # --- Apps ---
   mealie:
     image: ghcr.io/mealie-recipes/mealie:v1.4.0
+    container_name: mealie
+    restart: always
+    ports:
+      - "9925:80"
     environment:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: America/Detroit
-      BASE_URL: http://mealie.local
+      ALLOW_SIGNUP: "false"
+      PUID: 1000
+      PGID: 1000
+      TZ: America/Anchorage
+      #BASE_URL: https://mealie.yourdomain.com
+      # Database Settings
+      DB_ENGINE: postgres
+      POSTGRES_USER: Docker
+      POSTGRES_PASSWORD: run/secrets/postgres_password
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: mealie
     volumes:
-      - /srv/containers/mealie/data:/app/data
-    networks: [services, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.mealie.rule=Host(`mealie.local`)"
-      - "traefik.http.services.mealie.loadbalancer.server.port=9000"
+      - mealie_data:/app/data
 
   grocy:
     image: lscr.io/linuxserver/grocy:latest
+    container_name: grocy
+    restart: always
+    ports:
+      - "9283:9283"
     environment:
       PUID: "1000"
       PGID: "1000"
       TZ: America/Detroit
     volumes:
-      - /srv/containers/grocy/config:/config
-    networks: [services, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grocy.rule=Host(`grocy.local`)"
-      - "traefik.http.services.grocy.loadbalancer.server.port=80"
+      - grocy_data:/config
 
-  paperless-ngx:
-    image: ghcr.io/paperless-ngx/paperless-ngx:latest
-    environment:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: America/Detroit
-      PAPERLESS_URL: http://paperless.local
-      PAPERLESS_REDIS: redis://redis:6379
-      PAPERLESS_FILENAME_FORMAT: "{created_year}/{correspondent}/{title}"
-      PAPERLESS_DBENGINE: postgresql
-      PAPERLESS_DBHOST: postgres
-      PAPERLESS_DBPORT: 5432
-      PAPERLESS_DBNAME: paperless
-      PAPERLESS_DBUSER: ${POSTGRES_USER:-stack}
-      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD:-stackpass}
-    volumes:
-      - /srv/containers/paperless/data:/usr/src/paperless/data
-      - /srv/containers/paperless/media:/usr/src/paperless/media
-      - /srv/containers/paperless/consume:/usr/src/paperless/consume
-    depends_on:
-      - redis
-    networks: [services, databases, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.paperless.rule=Host(`paperless.local`)"
-      - "traefik.http.services.paperless.loadbalancer.server.port=8000"
-
-  paperless-ai:
-    image: ghcr.io/paperless-ai/paperless-ai:latest
-    environment:
-      PAPERLESS_URL: http://paperless-ngx:8000
-      PAPERLESS_API_TOKEN: ${PAPERLESS_API_TOKEN:-REPLACE_WITH_TOKEN}
-      OPENAI_API_BASE: http://openwebui:8080/v1
-      OPENAI_API_KEY: "sk-noauth"
-      TZ: America/Detroit
-    depends_on:
-      - paperless-ngx
-      - openwebui
-    networks: [services, databases]
-
-  actual:
+  actualbudget:
     image: actualbudget/actual-server:latest
+    container_name: actualbudget
+    restart: always
+    ports:
+      - "5006:5006"
     volumes:
-      - /srv/containers/actual/data:/data
-    networks: [services, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.actual.rule=Host(`budget.local`)"
-      - "traefik.http.services.actual.loadbalancer.server.port=5006"
+      - actualbudget_data:/data
 
   homebox:
     image: ghcr.io/hay-kot/homebox:latest
-    environment:
-      HBOX_LOG_LEVEL: info
-      HBOX_ADMIN_EMAIL: you@example.com
-      HBOX_ADMIN_PASSWORD: ${HBOX_ADMIN_PASSWORD:-change_me}
-    volumes:
-      - /srv/containers/homebox/data:/data
-    networks: [services, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.homebox.rule=Host(`homebox.local`)"
-      - "traefik.http.services.homebox.loadbalancer.server.port=7745"
-
-  plex:
-    image: lscr.io/linuxserver/plex:latest
-    environment:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: America/Detroit
+    container_name: homebox
+    restart: always
     ports:
-      - "32400:32400/tcp"
-      - "3005:3005/tcp"
-      - "8324:8324/tcp"
-      - "32469:32469/tcp"
-      - "1900:1900/udp"
-      - "32410:32410/udp"
-      - "32412:32412/udp"
-      - "32413:32413/udp"
-      - "32414:32414/udp"
-      - "5353:5353/udp"
-    volumes:
-      - /srv/containers/plex/config:/config
-      - /srv/media/movies:/data/movies
-      - /srv/media/tv:/data/tv
-    networks: [services]
-
-  openwebui:
-    image: ghcr.io/open-webui/open-webui:latest
+      - 3100:7754
     environment:
-      OLLAMA_BASE_URL: http://ollama:11434
-      OPENAI_API_KEYS: "sk-noauth"
-      TZ: America/Detroit
+    - HBOX_LOG_LEVEL=info
+    - HBOX_LOG_FORMAT=text
+    - HBOX_WEB_MAX_UPLOAD_SIZE=10
     volumes:
-      - /srv/containers/openwebui/data:/app/backend/data
-    networks: [services, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.openwebui.rule=Host(`ai.local`)"
-      - "traefik.http.services.openwebui.loadbalancer.server.port=8080"
-
-  ollama:
-    image: ollama/ollama:latest
-    volumes:
-      - /srv/containers/openwebui/ollama:/root/.ollama
-    networks: [services]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: ["gpu"]   # remove if no GPU
+      - homebox_data:/data
 
   manyfold:
-    image: ghcr.io/manyfold3d/manyfold:latest
+    image: lscr.io/linuxserver/manyfold:latest
+    container_name: manyfold
+    restart: always
+    ports:
+      - "3000:3000"
     environment:
-      RAILS_LOG_TO_STDOUT: "true"
-      DATABASE_URL: postgres://${POSTGRES_USER:-stack}:${POSTGRES_PASSWORD:-stackpass}@postgres:5432/manyfold
-      REDIS_URL: redis://redis:6379/0
-      TZ: America/Detroit
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - DATABASE_URL= postgresql://Docker:run/secrets/postgres_password@postgres:5432/manyfold
+      - REDIS_URL=redis
+      - SECRET_KEY_BASE=
     volumes:
-      - /srv/containers/manyfold/storage:/rails/storage
-      - /srv/media/printing:/models
+      - manyfold_config:/config
+      - manyfold_data:/libraries #optional
     depends_on:
       - postgres
-      - redis
-    networks: [services, databases, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.manyfold.rule=Host(`manyfold.local`)"
-      - "traefik.http.services.manyfold.loadbalancer.server.port=3000"
-
-  # Immich (photo/video)
-  immich-server:
-    image: ghcr.io/immich-app/immich-server:release
-    environment:
-      DB_URL: postgres://${POSTGRES_USER:-stack}:${POSTGRES_PASSWORD:-stackpass}@postgres:5432/immich
-      REDIS_HOSTNAME: redis
-      IMMICH_MEDIA_LOCATION: /usr/src/app/upload
-      TZ: America/Detroit
-    volumes:
-      - /srv/media/immich:/usr/src/app/upload
-    depends_on:
-      - postgres
-      - redis
-    networks: [services, databases, proxy]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: ["gpu"]   # remove if no GPU
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.immich.rule=Host(`immich.local`)"
-      - "traefik.http.services.immich.loadbalancer.server.port=2283"
-
-  immich-machine-learning:
-    image: ghcr.io/immich-app/immich-machine-learning:release
-    environment:
-      TZ: America/Detroit
-    depends_on:
-      - immich-server
-    networks: [services]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: ["gpu"]   # remove if no GPU
-
-  # Nextcloud (Apache)
-  nextcloud:
-    image: nextcloud:stable-apache
-    environment:
-      TZ: America/Detroit
-      POSTGRES_DB: nextcloud
-      POSTGRES_USER: ${POSTGRES_USER:-stack}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-stackpass}
-      POSTGRES_HOST: postgres
-      REDIS_HOST: redis
-      REDIS_HOST_PORT: 6379
-      NEXTCLOUD_TRUSTED_DOMAINS: nextcloud.local
-    volumes:
-      - /srv/containers/nextcloud/html:/var/www/html
-      - /srv/containers/nextcloud/data:/var/www/html/data
-    depends_on:
-      - postgres
-      - redis
-    networks: [services, databases, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.local`)"
-      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
-
-  glance:
-    image: glanceapp/glance:latest
-    volumes:
-      - /srv/containers/glance/glance.yml:/app/glance.yml:ro
-    networks: [services, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.glance.rule=Host(`home.local`)"
-      - "traefik.http.services.glance.loadbalancer.server.port=8080"
-
-  pinchflat:
-    image: ghcr.io/kepano/pinchflat:latest
-    environment:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: America/Detroit
-    volumes:
-      - /srv/containers/pinchflat/config:/config
-      - /srv/media/youtube:/downloads
-    networks: [services, proxy]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.pinchflat.rule=Host(`pinchflat.local`)"
-      - "traefik.http.services.pinchflat.loadbalancer.server.port=8945"
 
