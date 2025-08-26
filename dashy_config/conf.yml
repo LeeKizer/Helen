@@ -10,9 +10,18 @@ sections: # An array of sections
     url: https://github.com/LeeKizer/Helen/
 - name: Local Services
   items:
-  - title: Firewall
+  - title: mealie
     icon: favicon
-    url: http://192.168.1.1/
-  - title: Game Server
-    icon: https://i.ibb.co/710B3Yc/space-invader-x256.png
-    url: http://192.168.130.1/
+    url: http://192.168.1.92:9925/
+  - title: grocy
+    icon: favicon
+    url: http://192.168.1.92:9283/
+  - title: actualbudget
+    icon: favicon
+    url: http://192.168.1.92:5006/
+  - title: homebox
+    icon: favicon
+    url: http://192.168.1.92:3100/
+  - title: manyfold
+    icon: favicon
+    url: http://192.168.1.92:3000/
