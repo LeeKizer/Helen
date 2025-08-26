@@ -15,6 +15,9 @@ volumes:
   postgres_data:
     name: postgres_data
     driver: local
+  protainer_data:
+    name: protainer_data
+    driver: local
   mealie_data:
     name: mealie_data
     driver: local
@@ -74,6 +77,20 @@ services:
     volumes:
       - redis_data:/data
     networks: [databases]
+
+  # --- Infrasructure ---
+  portainer:
+    image: portainer/portainer-ce:alpine
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - "9000:9000"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "portainer_data:/data"
+    restart: always
+
+  vaultwarden:
 
   # --- Apps ---
   mealie:
