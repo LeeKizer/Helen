@@ -1,0 +1,27 @@
+pageInfo:
+  title: Helen Home Lab
+sections: # An array of sections
+- name: AI apps
+  icon: far fa-rocket
+  items:
+  - title: GitHub / Helen
+    description: Helen source code and docs
+    icon: fab fa-github
+    url: https://github.com/LeeKizer/Helen/
+- name: Local Services
+  items:
+  - title: mealie
+    icon: favicon
+    url: http://192.168.1.92:9925/
+  - title: grocy
+    icon: favicon
+    url: http://192.168.1.92:9283/
+  - title: actualbudget
+    icon: favicon
+    url: http://192.168.1.92:5006/
+  - title: homebox
+    icon: favicon
+    url: http://192.168.1.92:3100/
+  - title: manyfold
+    icon: favicon
+    url: http://192.168.1.92:3000/
