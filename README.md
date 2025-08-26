@@ -1,6 +1,3 @@
-Helen
-=====
-
 This repository collects docker-compose stacks for a personal home server.
 
 Prerequisites
