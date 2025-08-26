@@ -1,0 +1,27 @@
+version: "3.9"
+
+# --- NETWORKS ---
+networks:
+  services:
+
+# --- VOLUMES ---
+volumes:
+  dashy_config:
+    name: dashy_config
+    driver: local
+  
+# --- SERVICES ---
+services:
+  dashy:
+    image: lissy93/dashy
+    container_name: dashy
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    environment: 
+      - NODE_ENV=production
+      - UID = 1000
+      - GIU = 1000
+    volumes:
+      - dashy_config:/app/user-data/conf.yml
+    networks: [services]
