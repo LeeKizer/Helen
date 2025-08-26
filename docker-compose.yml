@@ -42,6 +42,9 @@ volumes:
   dashy_config:
     name: dashy_config
     driver: local
+  nextcloud_data:
+    name: nextcould_data
+    driver local
 
 # =========
 # SECRETS
@@ -49,7 +52,12 @@ volumes:
 secrets:
   postgres_password:
     file: ./secrets/postgres_password.txt
+  nextcloud_admin:
+    file: ./secrets/nextcloud_admin.txt
+  nextcloud_password:
+    file: ./secrets/nextcloud_password.txt
 
+    
 # =========
 # SERVICES
 # =========
@@ -93,6 +101,22 @@ services:
   vaultwarden:
 
   # --- Apps ---
+  nextcloud:
+    image: nextcloud:apache
+    container_name: nextcloud
+    restart: always
+    ports:
+      - 8100:80
+    environment:
+      - POSTGRES_HOST: postgres
+      - POSTGRES_PASSWORD: run/secrets/postgres_password
+      - POSTGRES_DB: nextcloud
+      - POSTGRES_USER: Docker
+      - NEXTCLOUD_ADMIN_USER: run/secrets/
+      - NEXTCLOUD_ADMIN_PASSWORD: run/secrets/
+    volumes:
+      - nextcloud_data
+  
   mealie:
     image: ghcr.io/mealie-recipes/mealie:v1.4.0
     container_name: mealie
