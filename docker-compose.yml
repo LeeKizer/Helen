@@ -4,6 +4,10 @@ version: "3.9"
 # INCLUDE yml FILEs
 # =========
 include:
+  - portainer-compose.yml
+  - nextcloud-compose.yml
+  - dashy-compose.yml
+  - manyfold-compose.yml
 
 
 # =========
@@ -11,7 +15,7 @@ include:
 # =========
 networks:
   services:
-  databases:
+services:
     internal: true
 
 # =========
@@ -20,9 +24,6 @@ networks:
 volumes:
   postgres_data:
     name: postgres_data
-    driver: local
-  protainer_data:
-    name: protainer_data
     driver: local
   mealie_data:
     name: mealie_data
@@ -36,21 +37,9 @@ volumes:
   homebox_data:
     name: homebox_data
     driver: local
-  manyfold_data:
-    name: manyfold_data
-    driver: local
-  manyfold_config:
-    name: manyfold_config
-    driver: local
   redis_data:
     name: redis_data
     driver: local
-  dashy_config:
-    name: dashy_config
-    driver: local
-  nextcloud_data:
-    name: nextcould_data
-    driver local
 
 # =========
 # SECRETS
@@ -58,11 +47,6 @@ volumes:
 secrets:
   postgres_password:
     file: ./secrets/postgres_password.txt
-  nextcloud_admin:
-    file: ./secrets/nextcloud_admin.txt
-  nextcloud_password:
-    file: ./secrets/nextcloud_password.txt
-
     
 # =========
 # SERVICES
@@ -93,36 +77,9 @@ services:
     networks: [databases]
 
   # --- Infrasructure ---
-  portainer:
-    image: portainer/portainer-ce:alpine
-    container_name: portainer
-    command: -H unix:///var/run/docker.sock
-    ports:
-      - "9000:9000"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "portainer_data:/data"
-    restart: always
-
   vaultwarden:
 
-  # --- Apps ---
-  nextcloud:
-    image: nextcloud:apache
-    container_name: nextcloud
-    restart: always
-    ports:
-      - 8100:80
-    environment:
-      - POSTGRES_HOST: postgres
-      - POSTGRES_PASSWORD: run/secrets/postgres_password
-      - POSTGRES_DB: nextcloud
-      - POSTGRES_USER: Docker
-      - NEXTCLOUD_ADMIN_USER: run/secrets/
-      - NEXTCLOUD_ADMIN_PASSWORD: run/secrets/
-    volumes:
-      - nextcloud_data
-  
+  # --- Apps ---  
   mealie:
     image: ghcr.io/mealie-recipes/mealie:v1.4.0
     container_name: mealie
@@ -183,38 +140,3 @@ services:
     volumes:
       - homebox_data:/data
     network: [services]
-
-  manyfold:
-    image: lscr.io/linuxserver/manyfold:latest
-    container_name: manyfold
-    restart: always
-    ports:
-      - 3000:3000
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - DATABASE_URL= postgresql://Docker:run/secrets/postgres_password@postgres:5432/manyfold
-      - REDIS_URL=redis
-      - SECRET_KEY_BASE=
-    volumes:
-      - manyfold_config:/config
-      - manyfold_data:/libraries #optional
-    depends_on:
-      - postgres
-    network: [services, databases]
-
-  dashy:
-    image: lissy93/dashy
-    container_name: dashy
-    restart: always
-    ports:
-      - 8080:8080
-    environment:
-      - NODE_ENV=production
-      - UID = 1000
-      - GIU = 1000
-    volumes:
-      - dashy_config:/app/user-data/conf.yml
-    networks: [services, databases]
-
