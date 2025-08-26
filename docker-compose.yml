@@ -36,6 +36,9 @@ volumes:
   redis_data:
     name: redis_data
     driver: local
+  dashy_config:
+    name: dashy_config
+    driver: local
 
 # =========
 # SECRETS
@@ -54,7 +57,7 @@ services:
     container_name: postgres
     restart: always
     ports:
-      - "5432:5432"
+      - 5432:5432
     environment:
       POSTGRES_USER: Docker
       POSTGRES_PASSWORD: run/secrets/postgres_password
@@ -67,7 +70,7 @@ services:
     container_name: redis
     restart: always
     ports:
-      - "6379:6379"
+      - 6379:6379
     volumes:
       - redis_data:/data
     networks: [databases]
@@ -78,7 +81,7 @@ services:
     container_name: mealie
     restart: always
     ports:
-      - "9925:80"
+      - 9925:80
     environment:
       ALLOW_SIGNUP: "false"
       PUID: 1000
@@ -101,7 +104,7 @@ services:
     container_name: grocy
     restart: always
     ports:
-      - "9283:9283"
+      - 9283:9283
     environment:
       PUID: "1000"
       PGID: "1000"
@@ -115,7 +118,7 @@ services:
     container_name: actualbudget
     restart: always
     ports:
-      - "5006:5006"
+      - 5006:5006
     volumes:
       - actualbudget_data:/data
     network: [services]
@@ -139,7 +142,7 @@ services:
     container_name: manyfold
     restart: always
     ports:
-      - "3000:3000"
+      - 3000:3000
     environment:
       - PUID=1000
       - PGID=1000
@@ -153,4 +156,18 @@ services:
     depends_on:
       - postgres
     network: [services, databases]
+
+  dashy:
+    image: lissy93/dashy
+    container_name: dashy
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - NODE_ENV=production
+      - UID = 1000
+      - GIU = 1000
+    volumes:
+      - dashy_config:/app/user-data/conf.yml
+    networks: [services, databases]
 
