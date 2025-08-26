@@ -1,0 +1,22 @@
+version: "3.9"
+
+# --- NETWORKS ---
+networks:
+#  infrasructure:
+#  services:
+#  databases:
+
+# --- VOLUMES ---
+volumes:
+  
+  
+# --- SERVICES ---
+services:
+  container:
+    image: 
+    container_name: 
+    restart: unless-stopped #always
+    ports:
+      -
+    environment:
+    volumes:
