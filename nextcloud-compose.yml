@@ -18,6 +18,13 @@ volumes:
   data:
     name: nextcould_data
     driver: local
+
+# --- SECRETS ---
+secrets:
+  nextcloud_admin:
+    file: ./secrets/nextcloud_admin.txt
+  nextcloud_password:
+    file: ./secrets/nextcloud_password.txt
   
 # --- SERVICES ---
 services:
