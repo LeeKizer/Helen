@@ -94,6 +94,7 @@ services:
       POSTGRES_DB: mealie
     volumes:
       - mealie_data:/app/data
+    networks: [services, databases]
 
   grocy:
     image: lscr.io/linuxserver/grocy:latest
@@ -107,6 +108,7 @@ services:
       TZ: America/Detroit
     volumes:
       - grocy_data:/config
+    network: [services]
 
   actualbudget:
     image: actualbudget/actual-server:latest
@@ -116,6 +118,7 @@ services:
       - "5006:5006"
     volumes:
       - actualbudget_data:/data
+    network: [services]
 
   homebox:
     image: ghcr.io/hay-kot/homebox:latest
@@ -129,6 +132,7 @@ services:
     - HBOX_WEB_MAX_UPLOAD_SIZE=10
     volumes:
       - homebox_data:/data
+    network: [services]
 
   manyfold:
     image: lscr.io/linuxserver/manyfold:latest
@@ -148,4 +152,5 @@ services:
       - manyfold_data:/libraries #optional
     depends_on:
       - postgres
+    network: [services, databases]
 
