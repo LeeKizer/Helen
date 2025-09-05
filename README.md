@@ -8,6 +8,8 @@ Infrastructure
 * treafik
 * [Uptime Kuma](https://github.com/louislam/uptime-kuma)
 * [Vaultwarden](https://github.com/dani-garcia/vaultwarden)
+* Backrest
+* restic
 
 AI / LLM
 * [Ollama](https://ollama.ai/)
